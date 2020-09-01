@@ -9,12 +9,12 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
           <% if(username){ %>
-            <form class="form-inline" action="/logout" method="POST"></form>
-            <input placeholder="<%= username %>" class="form-control" type="text" name="username" disabled >
+            <form class="form-inline" action="/logout" method="POST">
+            <input placeholder="<%= username %>" class="form-control" type="text" name="username" disabled>
             <button type="submit" class="btn btn-primary">Log Out</button>
             </form>
           <% } else{ %>
-            <form class="form-inline" action="/login" method="POST"></form>
+            <form class="form-inline" action="/login" method="POST">
             <input placeholder="Username" class="form-control" type="text" name="username" >
             <button type="submit" class="btn btn-primary">Login</button>
             </form>
