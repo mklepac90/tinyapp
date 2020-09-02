@@ -1,24 +1,30 @@
 // Setup
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 //-------------------------------------------------------------------------------
-// Global function
+// Global function - random string generator (move to separate module?)
 function generateRandomString(length) {
   return Math.random().toString(36).substring(2, (length + 2));
 }
 //--------------------------------------------------------------------------------
-// Object database
+// "Databases
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const userDatabase = {
+
+
+};
 //--------------------------------------------------------------------------------
+// Login/Logout
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
@@ -28,6 +34,12 @@ app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 });
+//----------------------------------------------------------------------------------
+// User Registration
+app.get("/register", (req, res) => {
+  res.render("registrationForm");
+
+})
 
 app.get("/", (req, res) => {
   res.send("Hello!");
