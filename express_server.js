@@ -7,23 +7,31 @@ app.use(cookieParser());
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
-//-------------------------------------------------------------------------------
-// Global function - random string generator (move to separate module?)
+//------------------------------------------------------------------------------
+// Global functions
 function generateRandomString(length) {
   return Math.random().toString(36).substring(2, (length + 2));
-}
-//--------------------------------------------------------------------------------
-// "Databases
+};
+
+const createUser = (userDB, id, email, password) => {
+  userDB[id] = {
+    id,
+    email,
+    password
+  }
+};
+//------------------------------------------------------------------------------
+// "Databases"
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-const userDatabase = {
+const users = {
 
 
 };
-//--------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 // Login/Logout
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
@@ -34,13 +42,20 @@ app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 });
-//----------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 // User Registration
 app.get("/register", (req, res) => {
   res.render("registrationForm");
+});
 
-})
-
+app.post("/register", (req, res) => {
+  const user_id = generateRandomString(6);
+  createUser(users, user_id, req.body.email, req.body.password);
+  // console.log(users);
+  res.cookie("user_id", user_id);
+  res.redirect("/urls");
+});
+//------------------------------------------------------------------------------
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -93,3 +108,4 @@ app.post("/urls/:shortURL/update", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+//------------------------------------------------------------------------------

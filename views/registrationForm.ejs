@@ -10,11 +10,11 @@
 </head>
 <body>
   <main style="margin: 1em;"></main>
-  <h1>New User Registration</h1>
-  <form>
-    <input type="email" name="email" placeholder="email">
-    <input type="password" name="password" placeholder="password">
-    <button>Register</button>
+  <h1 class="card-title">New User Registration</h1>
+  <form class="form-inline" action="/register" method="POST">
+    <input type="email" name="email" placeholder="email" class="form-control">
+    <input type="password" name="password" placeholder="password" class="form-control">
+    <button class="btn btn-primary">Register</button>
   </form>
   </main>
   <!-- Bootstrap JS -->
