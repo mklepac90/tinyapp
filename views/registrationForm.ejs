@@ -9,8 +9,9 @@
   <title>TinyApp User Registration</title>
 </head>
 <body>
+  <%- include('partials/_header') %>
   <main style="margin: 1em;"></main>
-  <h1 class="card-title">New User Registration</h1>
+  <h1 class="card-title">Create Account</h1>
   <form class="form-inline" action="/register" method="POST">
     <input type="email" name="email" placeholder="email" class="form-control">
     <input type="password" name="password" placeholder="password" class="form-control">

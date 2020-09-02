@@ -60,8 +60,8 @@ const users = {
 ///------------------------------------------------------------------------------
 // Login/Logout
 app.get("/login", (req, res) => {
-  // res.cookie('user_id', users["user_id"]);
-  res.render("login");
+  let templateVars = { user: users[req.cookies["user_id"]] };
+  res.render("login", templateVars);
 });
 
 app.post("/login", (req, res) => {
@@ -85,7 +85,8 @@ app.post("/logout", (req, res) => {
 ///------------------------------------------------------------------------------
 // User Registration
 app.get("/register", (req, res) => {
-  res.render("registrationForm");
+  let templateVars = { user: users[req.cookies["user_id"]] };
+  res.render("registrationForm", templateVars);
 });
 
 app.post("/register", (req, res) => {
