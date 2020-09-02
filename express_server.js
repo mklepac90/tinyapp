@@ -29,6 +29,23 @@ const checkEmail = (object, email) => {
   }
   return false;
 };
+
+const checkPassword = (object, email) => {
+  for (let key in object) {
+    if (object[key].email === email) {
+      return object[key].password;
+    }
+  }
+};
+
+const returnUser = (object, email) => {
+  for (let key in object) {
+    if (object[key].email === email) {
+      return object[key].id;
+    }
+  }
+  return false;
+};
 //------------------------------------------------------------------------------
 // "Databases"
 const urlDatabase = {
@@ -45,6 +62,20 @@ const users = {
 app.get("/login", (req, res) => {
   // res.cookie('user_id', users["user_id"]);
   res.render("login");
+});
+
+app.post("/login", (req, res) => {
+  if (!checkEmail(users, req.body.email)) {
+    return res.sendStatus(403);
+  }
+  if (checkEmail(users, req.body.email) && checkPassword(users, req.body.email) !== req.body.password) {
+    return res.sendStatus(403);
+  }
+  if (checkEmail(users, req.body.email) && checkPassword(users, req.body.email) === req.body.password) {
+    const user_id = returnUser(users, req.body.email);
+    res.cookie('user_id', user_id);
+    res.redirect('/urls');
+  }  
 });
 
 app.post("/logout", (req, res) => {
