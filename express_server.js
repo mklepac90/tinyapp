@@ -42,14 +42,14 @@ const users = {
 };
 ///------------------------------------------------------------------------------
 // Login/Logout
-app.post("/login", (req, res) => {
-  res.cookie('user_id', users["user_id"]);
-  res.redirect('/urls');
+app.get("/login", (req, res) => {
+  // res.cookie('user_id', users["user_id"]);
+  res.render("login");
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 ///------------------------------------------------------------------------------
 // User Registration
