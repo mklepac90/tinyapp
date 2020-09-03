@@ -125,7 +125,7 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   if (!req.cookies["user_id"]) {
-    res.send('<html><body>Access Denied: Please <a href="/register">register</a> or <a href="/login">login</a> to view this resource</body></html>\n');
+    res.send('<html><body>Access denied: Please <a href="/register">register</a> or <a href="/login">login</a> to view this resource</body></html>\n');
   } else {
     const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
     let templateVars = { urls: urlDatabaseF, user: users[req.cookies["user_id"]] };
@@ -148,11 +148,17 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (!req.cookies["user_id"]) {
-    res.send('<html><body>Access Denied: Please <a href="/register">register</a> or <a href="/login">login</a> to view this resource</body></html>\n');
-  } else {
-    const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+    res.send('<html><body>Access denied: Please <a href="/register">register</a> or <a href="/login">login</a> to view this resource</body></html>\n');
+  }
+    
+  const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+  
+  // if shortURL (key) isn't present in urlDatabaseF then do not render. Instead res.send <html><body> Access denied: resource not owned by this user
+  if (Object.keys(urlDatabaseF).includes(req.params.shortURL)) {
     let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]] };
     res.render("urls_show", templateVars);
+  } else {
+    res.send('<html><body>Access denied: Resource does not belong to this user. Please <a href="/login">login</a> to view this resource</body></html>\n')
   }
 });
 
@@ -169,13 +175,23 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls');
+  const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+  if (Object.keys(urlDatabaseF).includes(req.params.shortURL)) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect('/urls');
+  } else {
+    res.send('<html><body>Access denied: Resource does not belong to this user. Please <a href="/login">login</a> to delete this resource</body></html>\n')
+  }
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
-  urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-  res.redirect('/urls');
+  const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+  if (Object.keys(urlDatabaseF).includes(req.params.shortURL)) {
+    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+    res.redirect('/urls');
+  } else {
+    res.send('<html><body>Access denied: Resource does not belong to this user. Please <a href="/login">login</a> to edit this resource</body></html>\n')
+  }
 });
 
 app.listen(PORT, () => {
