@@ -12,56 +12,63 @@ app.use(bodyParser.urlencoded({extended: true}));
 const bcrypt = require('bcrypt');
 app.set("view engine", "ejs");
 //------------------------------------------------------------------------------
-// Global functions
-function generateRandomString(length) {
-  return Math.random().toString(36).substring(2, (length + 2));
-};
+// Helper functions
+const { generateRandomString } = require('./helpers');
+const { createUser } = require('./helpers');
+const { checkEmail } = require('./helpers');
+const { checkPassword } = require('./helpers');
+const { returnUserID } = require('./helpers');
+const { urlsForUser } = require('./helpers');
 
-const createUser = (userDB, id, email, password) => {
-  userDB[id] = {
-    id,
-    email,
-    password
-  }
-};
+// function generateRandomString(length) {
+//   return Math.random().toString(36).substring(2, (length + 2));
+// };
 
-const checkEmail = (object, email) => {
-  for (let key in object) {
-    if (object[key].email === email) {
-      return true;
-    }
-  }
-  return false;
-};
+// const createUser = (userDB, id, email, password) => {
+//   userDB[id] = {
+//     id,
+//     email,
+//     password
+//   }
+// };
 
-const checkPassword = (object, email) => {
-  for (let key in object) {
-    if (object[key].email === email) {
-      return object[key].password;
-    }
-  }
-};
+// const checkEmail = (object, email) => {
+//   for (let key in object) {
+//     if (object[key].email === email) {
+//       return true;
+//     }
+//   }
+//   return false;
+// };
 
-const returnUser = (object, email) => {
-  for (let key in object) {
-    if (object[key].email === email) {
-      return object[key].id;
-    }
-  }
-  return false;
-};
+// const checkPassword = (object, email) => {
+//   for (let key in object) {
+//     if (object[key].email === email) {
+//       return object[key].password;
+//     }
+//   }
+// };
 
-const urlsForUser = (object, id) => {
-  const copiedObject = JSON.parse(JSON.stringify(object));
-  for (const key in copiedObject) {
-    if (copiedObject[key].userID !== id) {
-      delete copiedObject[key];
-    }
-  }
+// const returnUserID = (object, email) => {
+//   for (let key in object) {
+//     if (object[key].email === email) {
+//       return object[key].id;
+//     }
+//   }
+//   return false;
+// };
 
-  return copiedObject;
+// const urlsForUser = (object, id) => {
+//   const copiedObject = JSON.parse(JSON.stringify(object));
+//   for (const key in copiedObject) {
+//     if (copiedObject[key].userID !== id) {
+//       delete copiedObject[key];
+//     }
+//   }
 
-};
+//   return copiedObject;
+
+// };
 //------------------------------------------------------------------------------
 // "Databases"
 const urlDatabase = {
@@ -88,7 +95,7 @@ app.post("/login", (req, res) => {
     return res.sendStatus(403);
   }
   if (checkEmail(users, req.body.email) && bcrypt.compareSync(req.body.password, checkPassword(users, req.body.email))) {
-    const user_id = returnUser(users, req.body.email);
+    const user_id = returnUserID(users, req.body.email);
     req.session.user_id = user_id;
     res.redirect('/urls');
   }  
