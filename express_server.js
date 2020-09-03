@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+const bcrypt = require('bcrypt');
 app.set("view engine", "ejs");
 //------------------------------------------------------------------------------
 // Global functions
@@ -80,10 +81,10 @@ app.post("/login", (req, res) => {
   if (!checkEmail(users, req.body.email)) {
     return res.sendStatus(403);
   }
-  if (checkEmail(users, req.body.email) && checkPassword(users, req.body.email) !== req.body.password) {
+  if (checkEmail(users, req.body.email) && !bcrypt.compareSync(req.body.password, checkPassword(users, req.body.email))) {
     return res.sendStatus(403);
   }
-  if (checkEmail(users, req.body.email) && checkPassword(users, req.body.email) === req.body.password) {
+  if (checkEmail(users, req.body.email) && bcrypt.compareSync(req.body.password, checkPassword(users, req.body.email))) {
     const user_id = returnUser(users, req.body.email);
     res.cookie('user_id', user_id);
     res.redirect('/urls');
@@ -108,8 +109,10 @@ app.post("/register", (req, res) => {
     return res.sendStatus(400);
   } else {
     const user_id = generateRandomString(6);
-    createUser(users, user_id, req.body.email, req.body.password);
-    // console.log(users);
+    const password = req.body.password;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    createUser(users, user_id, req.body.email, hashedPassword);
+    console.log(users);
     res.cookie("user_id", user_id);
     res.redirect("/urls");
   }
