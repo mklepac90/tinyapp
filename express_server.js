@@ -46,6 +46,18 @@ const returnUser = (object, email) => {
   }
   return false;
 };
+
+const urlsForUser = (object, id) => {
+  const copiedObject = JSON.parse(JSON.stringify(object));
+  for (const key in copiedObject) {
+    if (copiedObject[key].userID !== id) {
+      delete copiedObject[key];
+    }
+  }
+
+  return copiedObject;
+
+};
 //------------------------------------------------------------------------------
 // "Databases"
 const urlDatabase = {
@@ -112,8 +124,13 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
-  res.render("urls_index", templateVars);
+  if (!req.cookies["user_id"]) {
+    res.send('<html><body>Access Denied: Please <a href="/register">register</a> or <a href="/login">login</a> to view this resource</body></html>\n');
+  } else {
+    const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+    let templateVars = { urls: urlDatabaseF, user: users[req.cookies["user_id"]] };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -130,8 +147,13 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]] };
-  res.render("urls_show", templateVars);
+  if (!req.cookies["user_id"]) {
+    res.send('<html><body>Access Denied: Please <a href="/register">register</a> or <a href="/login">login</a> to view this resource</body></html>\n');
+  } else {
+    const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+    let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]] };
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -142,7 +164,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(6);
   urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.cookies["user_id"] };
-  console.log(urlDatabase);
+  // console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);  
 });
 
