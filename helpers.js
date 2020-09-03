@@ -1,4 +1,4 @@
-function generateRandomString(length) {
+const generateRandomString = (length) => {
   return Math.random().toString(36).substring(2, (length + 2));
 };
 
@@ -7,7 +7,7 @@ const createUser = (userDB, id, email, password) => {
     id,
     email,
     password
-  }
+  };
 };
 
 const checkEmail = (object, email) => {
@@ -37,8 +37,10 @@ const returnUserID = (object, email) => {
 };
 
 const urlsForUser = (object, id) => {
+  // Make deep copy of specified object
   const copiedObject = JSON.parse(JSON.stringify(object));
   for (const key in copiedObject) {
+    // Delete entries that don't contain specified id
     if (copiedObject[key].userID !== id) {
       delete copiedObject[key];
     }

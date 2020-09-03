@@ -10,13 +10,16 @@
 </head>
 <body>
   <%- include('partials/_header') %>
-  <main style="margin: 1em;"></main>
-  <h1 class="card-title">Login</h1>
-  <form class="form-inline" action="/login" method="POST">
-    <input type="email" name="email" placeholder="email" class="form-control">
-    <input type="password" name="password" placeholder="password" class="form-control">
-    <button class="btn btn-primary">Login</button>
-  </form>
+  <main style="margin: 1em;">
+    <h1 class="card-title">Login</h1>
+    <form class="form-inline" action="/login" method="POST">
+      <div class="form-group mb-2">
+        <input type="email" name="email" placeholder="E-mail Address" class="form-control">
+        <input type="password" name="password" placeholder="Password" class="form-control" style="width: 300px; margin: 1em">
+        <button class="btn btn-primary">Login</button>
+      </div>
+    </form>
+  <p class="card-text">No account? Register <a href="/register>">here!</a></p>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
