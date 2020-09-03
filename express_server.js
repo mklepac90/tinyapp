@@ -2,8 +2,11 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+  name: 'session', 
+  keys: ['key1', 'key2']
+}));
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const bcrypt = require('bcrypt');
@@ -73,7 +76,7 @@ const users = {
 ///------------------------------------------------------------------------------
 // Login/Logout
 app.get("/login", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] };
+  let templateVars = { user: users[req.session.user_id] };
   res.render("login", templateVars);
 });
 
@@ -86,19 +89,19 @@ app.post("/login", (req, res) => {
   }
   if (checkEmail(users, req.body.email) && bcrypt.compareSync(req.body.password, checkPassword(users, req.body.email))) {
     const user_id = returnUser(users, req.body.email);
-    res.cookie('user_id', user_id);
+    req.session.user_id = user_id;
     res.redirect('/urls');
   }  
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/login');
 });
 ///------------------------------------------------------------------------------
 // User Registration
 app.get("/register", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] };
+  let templateVars = { user: users[req.session.user_id] };
   res.render("registrationForm", templateVars);
 });
 
@@ -112,8 +115,7 @@ app.post("/register", (req, res) => {
     const password = req.body.password;
     const hashedPassword = bcrypt.hashSync(password, 10);
     createUser(users, user_id, req.body.email, hashedPassword);
-    console.log(users);
-    res.cookie("user_id", user_id);
+    req.session.user_id = user_id;
     res.redirect("/urls");
   }
 });
@@ -127,18 +129,18 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  if (!req.cookies["user_id"]) {
+  if (!req.session.user_id) {
     res.send('<html><body>Access denied: Please <a href="/register">register</a> or <a href="/login">login</a> to view this resource</body></html>\n');
   } else {
-    const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
-    let templateVars = { urls: urlDatabaseF, user: users[req.cookies["user_id"]] };
+    const urlDatabaseF = urlsForUser(urlDatabase, req.session.user_id);
+    let templateVars = { urls: urlDatabaseF, user: users[req.session.user_id] };
     res.render("urls_index", templateVars);
   }
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] };
-  if (!req.cookies["user_id"]) {
+  let templateVars = { user: users[req.session.user_id] };
+  if (!req.session.user_id) {
     res.redirect("/login");
   } else {
     res.render("urls_new", templateVars);
@@ -150,15 +152,14 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  if (!req.cookies["user_id"]) {
+  if (!req.session.user_id) {
     res.send('<html><body>Access denied: Please <a href="/register">register</a> or <a href="/login">login</a> to view this resource</body></html>\n');
   }
     
-  const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+  const urlDatabaseF = urlsForUser(urlDatabase, req.session.user_id);
   
-  // if shortURL (key) isn't present in urlDatabaseF then do not render. Instead res.send <html><body> Access denied: resource not owned by this user
   if (Object.keys(urlDatabaseF).includes(req.params.shortURL)) {
-    let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]] };
+    let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session.user_id] };
     res.render("urls_show", templateVars);
   } else {
     res.send('<html><body>Access denied: Resource does not belong to this user. Please <a href="/login">login</a> to view this resource</body></html>\n')
@@ -172,13 +173,12 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(6);
-  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.cookies["user_id"] };
-  // console.log(urlDatabase);
+  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
   res.redirect(`/urls/${shortURL}`);  
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+  const urlDatabaseF = urlsForUser(urlDatabase, req.session.user_id);
   if (Object.keys(urlDatabaseF).includes(req.params.shortURL)) {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
@@ -188,7 +188,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
-  const urlDatabaseF = urlsForUser(urlDatabase, req.cookies["user_id"]);
+  const urlDatabaseF = urlsForUser(urlDatabase, req.session.user_id);
   if (Object.keys(urlDatabaseF).includes(req.params.shortURL)) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect('/urls');
